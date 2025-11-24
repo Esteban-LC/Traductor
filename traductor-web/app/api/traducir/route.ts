@@ -116,32 +116,36 @@ EJEMPLOS DE MEJORAS GRAMATICALES:
 ❌ LITERAL (MAL):
 "¿Será que Anderka respondió a mi antigua plegaria?"
 "Mmm… Entonces, por favor, ¡muéstrame la respuesta!"
+"¿¡Sujeong reaccionó!?"
 
 ✅ NATURAL (BIEN):
 "¿La diosa Andercia ha respondido a mis oraciones?"
 "Bueno… Entonces, muéstrame la respuesta…"
+"¡La gema ha reaccionado!"
 
-OBSERVA:
-- "Será que" → "ha respondido" (más natural)
-- "antigua plegaria" → "oraciones" (más común)
+OBSERVA LOS CAMBIOS:
+- "¿Será que X?" → "¿X ha...?" (más natural)
+- "antigua plegaria" → "oraciones" (más común en español)
 - "Mmm" → "Bueno" (más natural en español)
 - "por favor, ¡muéstrame!" → "muéstrame…" (menos redundante)
+- Nombres que parecen objetos mágicos (Sujeong) → tradúcelos si tienen significado (gema, cristal, etc.)
+- Nombres que parecen de dioses/diosas → añade "diosa/dios" si falta para claridad
+
+PATRONES COMUNES EN MANGA/ANIME:
+- Si un nombre suena como objeto mágico y la base lo traduce literal, interpreta su significado
+- "plegaria/súplica" → "oraciones"
+- Interjecciones: "Mmm/Uhm/Hmm" → "Bueno"
+- "¿Será que...?" → "¿...ha...?" o simplemente "¿...?"
+- Redundancias: "por favor, muéstrame" → "muéstrame"
 
 ESTILO:
 - Natural, fluido y claro en español latino NEUTRAL.
 - NO uses lenguaje demasiado coloquial o agresivo.
-- Evita palabras como: "mocoso", "largo", "qué va", "sabelotodo".
+- Evita: "mocoso", "largo", "qué va", "sabelotodo".
 - Prefiere: "niño", "sal de aquí", "no me importa", "como si supieras".
 - Usa "dinero" en lugar de "plata".
-- Mejora la gramática: "¿Será que X?" → "¿X ha...?" cuando suene mejor.
-- Simplifica redundancias: "por favor, muéstrame" → "muéstrame" si ya es cortés.
+- Mejora la gramática sin cambiar el significado.
 - Mantén un tono RESPETUOSO y NEUTRAL.
-
-TÉRMINOS COMUNES EN MANGA/ANIME:
-- Si ves nombres que parecen de dioses/diosas (terminan en -ka, -cia, etc.), mantenlos como nombres propios.
-- "plegaria/súplica" → "oraciones" (más natural)
-- "gema/joya mágica" → mantén el contexto mágico
-- Honoríficos japoneses (-sama, -san, -kun) → manténlos si están en la base
 
 ORIGINAL (${nombreIdioma}):
 ${textoOriginal}
@@ -150,7 +154,7 @@ TRADUCCIÓN BASE (mejora la gramática y naturalidad):
 ${traduccionBase}
 
 REESCRIBE la TRADUCCIÓN BASE de forma NATURAL y FLUIDA en español latinoamericano,
-mejorando la gramática y evitando traducciones literales.
+mejorando la gramática y evitando traducciones literales. Aplica los patrones de mejora que te mostré.
 
 Devuelve SOLO la traducción mejorada, sin comentarios ni explicaciones.`;
 
