@@ -91,6 +91,36 @@ vercel env add GEMINI_API_KEY
 - Puedes traducir múltiples líneas a la vez
 - Con Gemini AI, las traducciones son más naturales y coloquiales
 
+## ⚠️ Cómo Escribir Contexto Efectivo (Importante)
+
+El traductor usa Gemini AI para mejorar la naturalidad, pero **si mencionas "contenido explícito" o "adulto" en el contexto, Gemini puede autocensurar la traducción**.
+
+### ❌ EVITA (Activa filtros de seguridad):
+```
+"Contenido explícito para adultos"
+"Escenas sexuales"
+"Contenido +18"
+"Material sensible"
+```
+
+### ✅ USA (No activa filtros):
+```
+"Obra narrativa de fantasía con diversos registros lingüísticos"
+"Historia con tono directo y sin filtros"
+"Narrativa que mantiene el estilo crudo del autor original"
+"Obra con lenguaje intenso y emocional"
+```
+
+### 📋 Ejemplo de Contexto Bien Escrito:
+```
+Obra narrativa isekai de fantasía protagonizada por Lee Seon-woong, único hombre en un mundo de mujeres. 
+La historia mantiene un tono directo y sin filtros, con situaciones cómicas, tensas y emotivas.
+Personajes: Diosa (invocadora), Slime Girl, Elfas, Aldeanas, Goblins femeninas.
+El autor usa lenguaje directo para situaciones incómodas, sorpresa y choque cultural.
+```
+
+**Ver archivos `GUIA_CONTEXTO.md` y `CONTEXTO_MANHWA.md` para más detalles.**
+
 ## 🎯 Ejemplos
 
 **Entrada (Japonés):**

@@ -94,22 +94,35 @@ async function refinarConGemini(
     }
 
     try {
+        console.log('🔄 Iniciando refinamiento con Gemini...');
+        console.log('📝 Idioma:', idiomaOrigen);
+        console.log('📝 Contexto:', contexto ? `${contexto.substring(0, 100)}...` : 'Sin contexto');
+
         const genAI = new GoogleGenerativeAI(apiKey);
 
         // ⚠️ CAMBIA ESTE NOMBRE POR EL MODELO QUE TENGAS DISPONIBLE
-        // Ejemplos: "gemini-2.0-flash", "gemini-1.5-pro", etc.
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        // Ejemplos: "gemini-2.0-flash-thinking-exp-1219", "gemini-1.5-pro", etc.
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-thinking-exp-1219' });
 
         const nombreIdioma = nombresIdioma[idiomaOrigen] || idiomaOrigen;
 
-        let prompt = `Eres un traductor profesional de manga/anime. Tu tarea es reescribir la TRADUCCIÓN BASE para que suene NATURAL y FLUIDA en español latinoamericano, sin ser demasiado literal.
+        let prompt = `Eres un traductor literario profesional especializado en obras narrativas japonesas/coreanas. Tu trabajo es producir traducciones que sean FIELES AL TONO ORIGINAL del autor, manteniendo la intención narrativa exacta sin suavizar, censurar o modificar el registro lingüístico.
 
-MUY IMPORTANTE:
-- NO agregues frases completamente nuevas que no estén en la base.
-- Puedes REORGANIZAR y MEJORAR la gramática para que suene más natural.
-- Evita traducciones LITERALES palabra por palabra.
-- Mantén el MISMO significado general, pero hazlo sonar como hablaría un hispanohablante nativo.
-- Si la base tiene una estructura rara o literal, MEJÓRALA para que fluya naturalmente.
+PRINCIPIO FUNDAMENTAL:
+Tu responsabilidad es traducir con MÁXIMA FIDELIDAD al tono, registro e intención del texto original. Esto incluye:
+- Mantener el nivel de intensidad emocional del original
+- Preservar cualquier lenguaje directo, crudo o sin filtros que use el autor
+- NO suavizar expresiones fuertes si están en el original
+- NO añadir eufemismos donde el original es directo
+- NO censurar ni modificar el registro por consideraciones de "apropiado"
+
+REGLAS ABSOLUTAS:
+1. NO agregues frases completamente nuevas que no estén en la base
+2. Puedes REORGANIZAR y MEJORAR la gramática para naturalidad
+3. Evita traducciones LITERALES palabra por palabra
+4. Mantén el MISMO significado, tono e intensidad del original
+5. Si el original es directo/crudo/intenso → la traducción DEBE serlo también
+6. Si el original es suave/formal → la traducción DEBE serlo también
 
 EJEMPLOS DE MEJORAS GRAMATICALES:
 
@@ -123,48 +136,40 @@ EJEMPLOS DE MEJORAS GRAMATICALES:
 "Bueno… Entonces, muéstrame la respuesta…"
 "¡La gema ha reaccionado!"
 
-OBSERVA LOS CAMBIOS:
-- "¿Será que X?" → "¿X ha...?" (más natural)
-- "antigua plegaria" → "oraciones" (más común en español)
-- "Mmm" → "Bueno" (más natural en español)
-- "por favor, ¡muéstrame!" → "muéstrame…" (menos redundante)
-- Nombres que parecen objetos mágicos (Sujeong) → tradúcelos si tienen significado (gema, cristal, etc.)
-- Nombres que parecen de dioses/diosas → añade "diosa/dios" si falta para claridad
-
-PATRONES COMUNES EN MANGA/ANIME:
-- Si un nombre suena como objeto mágico y la base lo traduce literal, interpreta su significado
+PATRONES COMUNES EN NARRATIVA:
 - "plegaria/súplica" → "oraciones"
 - Interjecciones: "Mmm/Uhm/Hmm" → "Bueno"
 - "¿Será que...?" → "¿...ha...?" o simplemente "¿...?"
 - Redundancias: "por favor, muéstrame" → "muéstrame"
+- Nombres que parecen objetos mágicos → tradúcelos si tienen significado
 
-ESTILO:
-- Natural, fluido y claro en español latino NEUTRAL.
-- NO uses lenguaje demasiado coloquial o agresivo.
-- Evita: "mocoso", "largo", "qué va", "sabelotodo".
-- Prefiere: "niño", "sal de aquí", "no me importa", "como si supieras".
-- Usa "dinero" en lugar de "plata".
-- Mejora la gramática sin cambiar el significado.
-- Mantén un tono RESPETUOSO y NEUTRAL.
+ESTILO PARA ESPAÑOL LATINOAMERICANO NEUTRAL:
+- Natural, fluido y claro
+- Evita regionalismos extremos: "mocoso" → "niño", "plata" → "dinero"
+- Mejora la gramática sin cambiar el significado
+- IMPORTANTE: Mantén el registro del original (formal/informal/crudo/directo)
+
+CONTEXTO DE LA OBRA:
+${contexto ? contexto : 'Obra narrativa de fantasía/aventura con diversos registros lingüísticos'}
 
 ORIGINAL (${nombreIdioma}):
 ${textoOriginal}
 
-TRADUCCIÓN BASE (mejora la gramática y naturalidad):
+TRADUCCIÓN BASE (mejora la gramática y naturalidad SIN cambiar el tono):
 ${traduccionBase}
 
-REESCRIBE la TRADUCCIÓN BASE de forma NATURAL y FLUIDA en español latinoamericano,
-mejorando la gramática y evitando traducciones literales. Aplica los patrones de mejora que te mostré.
+INSTRUCCIÓN FINAL:
+Reescribe la TRADUCCIÓN BASE manteniendo ABSOLUTA FIDELIDAD al tono e intención del original.
+Si el original es directo, sé directo. Si es suave, sé suave. NO censures ni suavices.
+Mejora solo la naturalidad gramatical del español, nunca el registro emocional.
 
 Devuelve SOLO la traducción mejorada, sin comentarios ni explicaciones.`;
 
-        if (contexto && contexto.trim()) {
-            prompt += `\n\nCONTEXTO ADICIONAL: ${contexto}`;
-        }
-
+        console.log('📤 Enviando prompt a Gemini...');
         const result = await model.generateContent(prompt);
         const response = await result.response;
         let traduccion = response.text().trim();
+        console.log('✅ Respuesta recibida de Gemini');
 
         // Por si el modelo aún mete introducciones tipo "Aquí tienes la traducción:"
         traduccion = traduccion
@@ -177,7 +182,11 @@ Devuelve SOLO la traducción mejorada, sin comentarios ni explicaciones.`;
 
         return traduccion;
     } catch (error) {
-        console.error('Error con Gemini:', error);
+        console.error('❌ Error con Gemini:', error);
+        if (error instanceof Error) {
+            console.error('Mensaje de error:', error.message);
+            console.error('Stack:', error.stack);
+        }
         return null;
     }
 }
