@@ -1,15 +1,95 @@
 'use client';
 
 import { useState } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Configure PDF.js worker
+if (typeof window !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+}
 
 export default function Home() {
   const [contexto, setContexto] = useState('');
+  const [archivoContexto, setArchivoContexto] = useState('');
+  const [nombreArchivo, setNombreArchivo] = useState('');
   const [idioma, setIdioma] = useState('japones');
   const [tono, setTono] = useState('neutro');
   const [textoOriginal, setTextoOriginal] = useState('');
   const [resultado, setResultado] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [cargandoArchivo, setCargandoArchivo] = useState(false);
+
+  const leerArchivoPDF = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let textoCompleto = '';
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items
+        .map((item: any) => item.str)
+        .join(' ');
+      textoCompleto += pageText + '\n';
+    }
+
+    return textoCompleto.trim();
+  };
+
+  const leerArchivoTXT = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  };
+
+  const manejarArchivoContexto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de archivo
+    const tipoValido = file.type === 'text/plain' || file.type === 'application/pdf';
+    const extensionValida = file.name.endsWith('.txt') || file.name.endsWith('.pdf');
+
+    if (!tipoValido && !extensionValida) {
+      setError('Solo se permiten archivos TXT y PDF');
+      return;
+    }
+
+    // Validar tamaño (5MB máximo)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('El archivo es demasiado grande (máximo 5MB)');
+      return;
+    }
+
+    setCargandoArchivo(true);
+    setError('');
+
+    try {
+      let texto = '';
+      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+        texto = await leerArchivoPDF(file);
+      } else {
+        texto = await leerArchivoTXT(file);
+      }
+
+      setArchivoContexto(texto);
+      setNombreArchivo(file.name);
+    } catch (err) {
+      setError('Error al leer el archivo');
+      console.error(err);
+    } finally {
+      setCargandoArchivo(false);
+    }
+  };
+
+  const removerArchivo = () => {
+    setArchivoContexto('');
+    setNombreArchivo('');
+  };
 
   const traducir = async () => {
     if (!textoOriginal.trim()) {
@@ -22,11 +102,16 @@ export default function Home() {
     setResultado('');
 
     try {
+      // Combinar contexto del archivo con contexto manual
+      const contextoCompleto = [archivoContexto, contexto]
+        .filter(Boolean)
+        .join('\n\n');
+
       const response = await fetch('/api/traducir', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contexto,
+          contexto: contextoCompleto,
           idioma,
           tono,
           textoOriginal
@@ -49,6 +134,8 @@ export default function Home() {
 
   const limpiar = () => {
     setContexto('');
+    setArchivoContexto('');
+    setNombreArchivo('');
     setTextoOriginal('');
     setResultado('');
     setError('');
@@ -82,6 +169,57 @@ export default function Home() {
                 className="w-full h-24 p-3 bg-gray-900 text-gray-100 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500"
                 placeholder="Nombres de personajes, estilo del manga, etc."
               />
+
+              {/* Sección de adjuntar archivo */}
+              <div className="mt-4 pt-4 border-t border-gray-700">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-200">
+                    📎 Adjuntar archivo de contexto
+                  </label>
+                </div>
+
+                {!nombreArchivo ? (
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".txt,.pdf"
+                      onChange={manejarArchivoContexto}
+                      className="hidden"
+                      disabled={cargandoArchivo}
+                    />
+                    <div className="flex items-center justify-center gap-2 p-3 bg-gray-700 hover:bg-gray-600 border border-gray-600 rounded-lg transition duration-200">
+                      {cargandoArchivo ? (
+                        <>
+                          <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400"></div>
+                          <span className="text-sm text-gray-300">Cargando archivo...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-2xl">📄</span>
+                          <span className="text-sm text-gray-300">Seleccionar archivo (TXT, PDF)</span>
+                        </>
+                      )}
+                    </div>
+                  </label>
+                ) : (
+                  <div className="flex items-center justify-between p-3 bg-green-900/30 border border-green-600 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">✓</span>
+                      <span className="text-sm text-green-200 truncate">{nombreArchivo}</span>
+                    </div>
+                    <button
+                      onClick={removerArchivo}
+                      className="text-red-400 hover:text-red-300 text-sm font-medium px-3 py-1 rounded transition duration-200"
+                    >
+                      ✕ Remover
+                    </button>
+                  </div>
+                )}
+
+                <p className="text-xs text-gray-400 mt-2">
+                  El contenido del archivo se combinará con el contexto escrito arriba
+                </p>
+              </div>
             </div>
 
             <div className="bg-gray-800 rounded-lg shadow-lg p-6 space-y-4 border border-gray-700">
