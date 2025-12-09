@@ -106,6 +106,14 @@ async function refinarConGemini(
 
         const nombreIdioma = nombresIdioma[idiomaOrigen] || idiomaOrigen;
 
+        const tipoObra =
+            (idiomaOrigen === 'japones') ? 'manga' :
+                (idiomaOrigen === 'coreano') ? 'manhwa' :
+                    (idiomaOrigen === 'chino') ? 'manhua' :
+                        'obra';
+
+        const instruccionFormato = `La traducción de un ${tipoObra} debe ser coherente, mantener la cohesion de las paginas traducidas, no debe ser literal, debe tener una buena gramatica, evitar la redundancia, mantener siempre presente el contexto de la historia al momento de traducir.`;
+
         let prompt = `Eres un traductor literario profesional especializado en obras narrativas japonesas/coreanas. Tu trabajo es producir traducciones que sean FIELES AL TONO ORIGINAL del autor, manteniendo la intención narrativa exacta sin suavizar, censurar o modificar el registro lingüístico.
 
 PRINCIPIO FUNDAMENTAL:
@@ -115,6 +123,9 @@ Tu responsabilidad es traducir con MÁXIMA FIDELIDAD al tono, registro e intenci
 - NO suavizar expresiones fuertes si están en el original
 - NO añadir eufemismos donde el original es directo
 - NO censurar ni modificar el registro por consideraciones de "apropiado"
+
+INSTRUCCIÓN DE FORMATO:
+${instruccionFormato}
 
 REGLAS ABSOLUTAS:
 1. NO agregues frases completamente nuevas que no estén en la base
