@@ -236,7 +236,7 @@ export default function Home() {
   const reconstruirJaponesVertical = (data: any): string => {
     if (!data?.symbols) return (data?.text || '').trim();
 
-    const chars = data.symbols
+    const chars: { ch: string; x: number; y: number }[] = data.symbols
       .filter((s: any) => s.text && s.text.trim())
       .map((s: any) => ({
         ch: s.text,
