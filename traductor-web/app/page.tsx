@@ -997,7 +997,7 @@ export default function Home() {
         </div>
 
         <div className="mt-8 text-center text-gray-500 text-xs">
-          <p>Potenciado por IA • OCR by Tesseract.js</p>
+          <p>Version 2.3.5 - Prueba</p>
         </div>
       </div>
     </div>
