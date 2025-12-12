@@ -18,7 +18,7 @@ export default function Home() {
   const [archivoContexto, setArchivoContexto] = useState('');
   const [nombreArchivo, setNombreArchivo] = useState('');
   const [idioma, setIdioma] = useState<IdiomaOrigen>('japones');
-  const [tono, setTono] = useState('neutro');
+
   const [textoOriginal, setTextoOriginal] = useState('');
   const [resultado, setResultado] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,10 +38,63 @@ export default function Home() {
   const [textoVerificado, setTextoVerificado] = useState('');
   const [mostrarVerificador, setMostrarVerificador] = useState(false);
 
-  // Abecedarios simples
+  // Japonés - organizados por categoría
   const hiragana = 'あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんー'.split('');
   const katakana = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンー'.split('');
-  const hangul = '가나다라마바사아자차카타파하'.split('');
+
+  // Palabras/partículas comunes en manga
+  const japonesComun = 'これそれあれどれこのそのあのどのなにだれいつどこなぜどうしてもうまだまたでもだからそれでしかしでは'.split(/(?=.)/u);
+  const particulas = 'はがをにへとでからまでもやのかねよわさだぞなぁ'.split('');
+
+  // Expresiones frecuentes en manga
+  const expresiones = ['ありがとう', 'ごめん', 'すみません', 'ください', 'おねがい', 'やめて', 'だめ', 'いや', 'うん', 'ええ', 'そう', 'ちがう', 'わかった', 'わからない', 'きた', 'いく', 'みる', 'きく', 'する', 'いい', 'すき', 'きらい', 'ほしい'];
+
+  // Onomatopeyas comunes
+  const onomatopeyas = 'ドキドキバタバタガタガタゴゴゴキラキラフワフワムニュザワザワギュッパタパタビクッガシャンズキュンチュパッ'.split(/(?<=.{2,4})(?=.)/u).filter(s => s.length >= 2);
+
+  // Términos ecchi/adultos frecuentes (censurado si es necesario)
+  const ecchi = ['あっ', 'んっ', 'やだ', 'いや', 'やめ', 'だめ', 'きもちいい', 'すごい', 'もっと', 'ねえ', 'あん', 'きゃ', 'いく', 'いっちゃう', 'はぁ', 'んん'];
+
+  // Puntuación japonesa
+  const puntuacionJP = '…？！♥♡★☆「」『』【】〈〉《》、。・ー～'.split('');
+
+  // Catálogo de frases comunes en manga/doujinshi para sugerencias
+  const frasesComunes = [
+    // Palabras cortas muy comunes
+    'これで', 'それで', 'あれで', 'どうして', 'なんで', 'どこ', 'なに', 'だれ',
+    'これ', 'それ', 'あれ', 'この', 'その', 'あの',
+    // Pronombres + は
+    'わたくしは', 'わたしは', 'ぼくは', 'おれは', 'あなたは', 'きみは',
+    // Títulos honoríficos
+    'タイラー様', 'ご主人様', '主人様', 'お嬢様', 'お兄様', '先生', 'さん', 'くん', 'ちゃん',
+    // Ser/estar
+    '奴隷です', '僕です', '私です', 'です', 'だ', 'である',
+    // Frases completas
+    'わたくしはタイラー様の奴隷です',
+    // Cortesías
+    'お願いします', 'ありがとうございます', 'すみません', 'ごめんなさい',
+    // Saludos
+    'いってきます', 'ただいま', 'おかえり', 'おはよう', 'こんにちは', 'こんばんは',
+    // Preguntas
+    'どうして', 'なんで', 'どうしたの', 'なにがあった', 'どういうこと',
+    // Respuestas
+    'そうだね', 'そうです', 'そうなの', 'ちがう', 'うそ', 'ほんとう',
+    // Comprensión
+    'わかりました', 'わかった', 'わからない', 'しらない',
+    // Negativas
+    'やめて', 'やめろ', 'だめ', 'いや', 'むり', 'できない',
+    // Adjetivos
+    'すごい', 'すてき', 'かわいい', 'きれい', 'かっこいい', 'こわい', 'うれしい', 'かなしい',
+    // Verbos comunes
+    'いく', 'くる', 'みる', 'きく', 'する', 'なる', 'ある', 'いる', 'もらう', 'あげる',
+    // Otros
+    'ありがとう', 'ごめん', 'おねがい', 'まって', 'ちょっと', 'もう', 'まだ'
+  ];
+
+  // Hangul - sílabas comunes en manhwa + puntuación
+  const hangulComun = '가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호구누두루무부수우주추쿠투푸후'.split('');
+  const hangulExtra = '정말뭐왜네예이그저것어떻게안돼됐싫좋알겠습니까요은는을를의에서도'.split('');
+  const puntuacion = '...?!~♥♡★☆「」『』【】〈〉《》、。·ㅋㅎㅠㅜ'.split('');
 
   // ─────────────────── Lectura de archivos de contexto ───────────────────
 
@@ -150,8 +203,8 @@ export default function Home() {
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
-    const resolutionScale = 3.0;
-    const padding = 40;
+    const resolutionScale = 4.0; // Aumentar resolución para mejor reconocimiento
+    const padding = 20; // Reducir padding
 
     const cropWidth = crop.width * scaleX * resolutionScale;
     const cropHeight = crop.height * scaleY * resolutionScale;
@@ -185,8 +238,11 @@ export default function Home() {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
-    if (idiomaActual === 'coreano' || idiomaActual === 'japones' || idiomaActual === 'chino') {
-      // Gris suave + pequeño boost de contraste
+    if (idiomaActual === 'japones') {
+      // Japonés: NO procesar, dejar original para mejor reconocimiento
+      // Tesseract funciona mejor con la imagen original sin modificar
+    } else if (idiomaActual === 'chino') {
+      // Chino: Gris suave + pequeño boost de contraste
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i];
         const g = data[i + 1];
@@ -194,6 +250,33 @@ export default function Home() {
 
         let gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
         gray = Math.min(255, Math.max(0, gray * 1.1));
+
+        data[i] = gray;
+        data[i + 1] = gray;
+        data[i + 2] = gray;
+      }
+    } else if (idiomaActual === 'coreano') {
+      // Coreano: Binarización con umbral adaptativo para mejor detección de hangul
+      const umbralBlanco = 200;
+      const umbralNegro = 80;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        let gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+        // Binarización más agresiva para coreano
+        if (gray > umbralBlanco) {
+          gray = 255;
+        } else if (gray < umbralNegro) {
+          gray = 0;
+        } else {
+          // Aumentar contraste en la zona media
+          gray = ((gray - umbralNegro) / (umbralBlanco - umbralNegro)) * 255;
+          gray = gray > 127 ? 255 : 0; // Binarizar
+        }
 
         data[i] = gray;
         data[i + 1] = gray;
@@ -230,35 +313,68 @@ export default function Home() {
   };
 
   /**
-   * Reconstruye japonés vertical usando los símbolos y sus bounding boxes.
+   * Reconstruye japonés vertical usando clustering de columnas.
    * Orden: columnas de derecha a izquierda, dentro de cada columna de arriba a abajo.
    */
   const reconstruirJaponesVertical = (data: any): string => {
-    if (!data?.symbols) return (data?.text || '').trim();
+    if (!data?.symbols || data.symbols.length === 0) {
+      return (data?.text || '').trim();
+    }
 
     const chars: { ch: string; x: number; y: number }[] = data.symbols
       .filter((s: any) => s.text && s.text.trim())
       .map((s: any) => ({
         ch: s.text,
-        x: s.bbox?.x0 ?? 0,
-        y: s.bbox?.y0 ?? 0,
+        x: s.bbox?.x0 ?? s.bbox?.x1 ?? 0,
+        y: s.bbox?.y0 ?? s.bbox?.y1 ?? 0,
       }));
 
     if (!chars.length) return (data.text || '').trim();
 
+    // Agrupar caracteres en columnas usando clustering simple
     const xs = chars.map(c => c.x);
     const minX = Math.min(...xs);
     const maxX = Math.max(...xs);
-    const approxCols = 4;
-    const colThreshold = (maxX - minX) / (approxCols * 2 || 1) || 10;
 
-    chars.sort((a, b) => {
-      const dx = b.x - a.x; // derecha → izquierda
-      if (Math.abs(dx) > colThreshold) return dx;
-      return a.y - b.y;     // dentro de columna: arriba → abajo
+    // Ancho promedio de columna (ajustar umbral dinámicamente)
+    const ancho = maxX - minX;
+    const numChars = chars.length;
+    const colThreshold = Math.max(15, ancho / (numChars / 3)); // Umbral adaptativo
+
+    // Agrupar en columnas
+    const columnas: { ch: string; x: number; y: number }[][] = [];
+
+    for (const char of chars) {
+      let encontrado = false;
+
+      for (const col of columnas) {
+        const xPromedio = col.reduce((sum, c) => sum + c.x, 0) / col.length;
+        if (Math.abs(char.x - xPromedio) < colThreshold) {
+          col.push(char);
+          encontrado = true;
+          break;
+        }
+      }
+
+      if (!encontrado) {
+        columnas.push([char]);
+      }
+    }
+
+    // Ordenar columnas de derecha a izquierda (por promedio X)
+    columnas.sort((a, b) => {
+      const xA = a.reduce((sum, c) => sum + c.x, 0) / a.length;
+      const xB = b.reduce((sum, c) => sum + c.x, 0) / b.length;
+      return xB - xA; // Mayor a menor (derecha a izquierda)
     });
 
-    return chars.map(c => c.ch).join('');
+    // Dentro de cada columna, ordenar de arriba a abajo
+    for (const col of columnas) {
+      col.sort((a, b) => a.y - b.y);
+    }
+
+    // Concatenar todo
+    return columnas.map(col => col.map(c => c.ch).join('')).join('');
   };
 
   // ─────────────────── OCR principal ───────────────────
@@ -273,61 +389,92 @@ export default function Home() {
     try {
       const imagenProcesada = procesarImagenParaOCR(imgRef.current, completedCrop, idioma);
 
-      // Determinar idioma y PSM
-      let lang = 'jpn';
-      let psm = '3';
+      let textoDetectado = '';
+      let metodoUsado = '';
 
-      if (idioma === 'ingles') {
-        lang = 'eng';
-        psm = '3';
-      }
-      if (idioma === 'coreano') {
-        lang = 'kor';
-        psm = '7'; // línea corta
-      }
-      if (idioma === 'chino') {
-        lang = 'chi_sim_vert';
-        psm = '5';
-      }
+      // ========== PASO 1: Manga-OCR para japonés (Hugging Face gratuito) ==========
       if (idioma === 'japones') {
-        lang = 'jpn_vert';
-        psm = '6';
-      }
+        try {
+          console.log('Intentando OCR con Manga-OCR (Hugging Face)...');
+          const response = await fetch('/api/ocr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: imagenProcesada })
+          });
 
-      const { data } = await Tesseract.recognize(
-        imagenProcesada,
-        lang,
-        {
-          // @ts-ignore
-          tessedit_pageseg_mode: psm,
-          logger: m => console.log(m)
+          const data = await response.json();
+
+          if (data.success && data.texto && data.texto.trim().length > 0) {
+            textoDetectado = data.texto.trim();
+            metodoUsado = 'Manga-OCR';
+            console.log('✓ Manga-OCR exitoso:', textoDetectado);
+          } else {
+            console.log('Manga-OCR no detectó, probando Tesseract...');
+          }
+        } catch (err) {
+          console.log('Manga-OCR error, probando Tesseract:', err);
         }
-      );
-
-      let rawText = data.text || '';
-      console.log('OCR RAW:', JSON.stringify(rawText));
-
-      // Para japonés, intentamos reconstruir columnas
-      if (idioma === 'japones') {
-        rawText = reconstruirJaponesVertical(data);
       }
 
-      // Limpieza básica
-      let textoLimpio = rawText.replace(/\s+/g, ' ').trim();
+      // ========== PASO 2: Tesseract como fallback ==========
+      if (!textoDetectado) {
+        metodoUsado = 'Tesseract';
+        console.log('Ejecutando OCR con Tesseract...');
 
-      // Para CJK: unir todo sin espacios
-      if (['japones', 'chino', 'coreano'].includes(idioma)) {
-        textoLimpio = textoLimpio.replace(/\s+/g, '');
-      }
+        let lang = 'jpn';
+        let psms: string[] = ['3'];
 
-      if (textoLimpio.length > 0) {
-        // No lo mandamos directo a Texto Original
-        // Lo mandamos al verificador
-        setTextoOCRBruto(textoLimpio);
-        setTextoVerificado(textoLimpio);
+        if (idioma === 'ingles') { lang = 'eng'; psms = ['3']; }
+        if (idioma === 'coreano') { lang = 'kor'; psms = ['3', '7', '6', '11', '10']; }
+        if (idioma === 'chino') { lang = 'chi_sim_vert'; psms = ['5', '6']; }
+        if (idioma === 'japones') { lang = 'jpn_vert'; psms = ['5', '6']; }
+        if (idioma === 'tailandes') { lang = 'tha'; psms = ['3', '6']; }
+        if (idioma === 'portugues') { lang = 'por'; psms = ['3', '6']; }
+
+        let data: any = null;
+        let rawText = '';
+
+        for (const psm of psms) {
+          const res = await Tesseract.recognize(imagenProcesada, lang, {
+            langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+            // @ts-ignore
+            tessedit_pageseg_mode: psm,
+            // @ts-ignore
+            tessedit_ocr_engine_mode: '1',
+            logger: m => console.log(m),
+          });
+
+          data = res.data;
+          rawText = (data.text || '').trim();
+
+          if (rawText.length > 0) {
+            console.log(`Tesseract OK con PSM=${psm}`);
+            break;
+          }
+        }
+
+        if (rawText && rawText.trim().length > 0) {
+          // Para japonés, reconstruir columnas
+          if (idioma === 'japones') {
+            rawText = reconstruirJaponesVertical(data);
+          }
+
+          // Limpieza
+          textoDetectado = rawText.replace(/\s+/g, ' ').trim();
+          if (['japones', 'chino', 'coreano'].includes(idioma)) {
+            textoDetectado = textoDetectado.replace(/\s+/g, '');
+          }
+          metodoUsado = 'Tesseract';
+        }
+      } // Fin del bloque Tesseract
+
+      // ========== PASO 3: Mostrar resultado o error ==========
+      if (textoDetectado.length > 0) {
+        setTextoOCRBruto(`[${metodoUsado}] ${textoDetectado}`);
+        setTextoVerificado(textoDetectado);
         setMostrarVerificador(true);
       } else {
-        setError(`No detecté texto (${lang}, PSM:${psm}).`);
+        setError('No se detectó texto. Usa las sugerencias rápidas (botones verdes) para escribir el texto manualmente.');
       }
 
     } catch (err) {
@@ -366,7 +513,6 @@ export default function Home() {
         body: JSON.stringify({
           contexto: contextoCompleto,
           idioma,
-          tono,
           textoOriginal
         })
       });
@@ -590,8 +736,9 @@ export default function Home() {
 
                     {idioma === 'japones' && (
                       <div className="space-y-1">
-                        <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                          {hiragana.map((ch) => (
+                        <p className="text-xs text-gray-500">Hiragana:</p>
+                        <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto">
+                          {hiragana.map((ch: string) => (
                             <button
                               key={`h-${ch}`}
                               type="button"
@@ -602,8 +749,10 @@ export default function Home() {
                             </button>
                           ))}
                         </div>
-                        <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto border-t border-gray-700 pt-1">
-                          {katakana.map((ch) => (
+
+                        <p className="text-xs text-gray-500 pt-1">Katakana:</p>
+                        <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto border-t border-gray-700 pt-1">
+                          {katakana.map((ch: string) => (
                             <button
                               key={`k-${ch}`}
                               type="button"
@@ -614,21 +763,142 @@ export default function Home() {
                             </button>
                           ))}
                         </div>
+
+                        <p className="text-xs text-gray-500 pt-1">💡 Sugerencias rápidas:</p>
+
+                        {/* Botón especial para frase completa */}
+                        <div className="flex gap-2 mb-2">
+                          <button
+                            type="button"
+                            onClick={() => setTextoVerificado('わたくしはタイラー様の奴隷です')}
+                            className="px-3 py-2 text-sm bg-yellow-600 hover:bg-yellow-500 rounded font-bold flex-1"
+                            title="Frase completa"
+                          >
+                            📝 わたくしはタイラー様の奴隷です
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTextoVerificado('')}
+                            className="px-3 py-2 text-sm bg-red-700 hover:bg-red-600 rounded"
+                            title="Limpiar texto"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+
+                        <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto border-t border-gray-700 pt-1 bg-gray-800/50 p-2 rounded">
+                          {frasesComunes.map((frase: string, idx: number) => (
+                            <button
+                              key={`frase-${idx}`}
+                              type="button"
+                              onClick={() => setTextoVerificado(frase)}
+                              className="px-2 py-1 text-sm bg-green-700 hover:bg-green-600 rounded transition"
+                              title="Click para usar esta frase"
+                            >
+                              {frase}
+                            </button>
+                          ))}
+                        </div>
+
+                        <p className="text-xs text-gray-500 pt-1">Expresiones frecuentes:</p>
+                        <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto border-t border-gray-700 pt-1">
+                          {expresiones.map((palabra: string, idx: number) => (
+                            <button
+                              key={`exp-${idx}`}
+                              type="button"
+                              onClick={() => setTextoVerificado((prev) => prev + palabra)}
+                              className="px-2 py-1 text-sm bg-blue-700 hover:bg-blue-600 rounded"
+                            >
+                              {palabra}
+                            </button>
+                          ))}
+                        </div>
+
+                        <p className="text-xs text-gray-500 pt-1">Onomatopeyas:</p>
+                        <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto border-t border-gray-700 pt-1">
+                          {onomatopeyas.map((ono: string, idx: number) => (
+                            <button
+                              key={`ono-${idx}`}
+                              type="button"
+                              onClick={() => setTextoVerificado((prev) => prev + ono)}
+                              className="px-2 py-1 text-sm bg-purple-700 hover:bg-purple-600 rounded"
+                            >
+                              {ono}
+                            </button>
+                          ))}
+                        </div>
+
+                        <p className="text-xs text-gray-500 pt-1">Ecchi/Adulto:</p>
+                        <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto border-t border-gray-700 pt-1">
+                          {ecchi.map((e: string, idx: number) => (
+                            <button
+                              key={`ec-${idx}`}
+                              type="button"
+                              onClick={() => setTextoVerificado((prev) => prev + e)}
+                              className="px-2 py-1 text-sm bg-pink-700 hover:bg-pink-600 rounded"
+                            >
+                              {e}
+                            </button>
+                          ))}
+                        </div>
+
+                        <p className="text-xs text-gray-500 pt-1">Puntuación:</p>
+                        <div className="flex flex-wrap gap-1 max-h-12 overflow-y-auto border-t border-gray-700 pt-1">
+                          {puntuacionJP.map((p: string, idx: number) => (
+                            <button
+                              key={`pjp-${idx}`}
+                              type="button"
+                              onClick={() => setTextoVerificado((prev) => prev + p)}
+                              className="px-2 py-1 text-sm bg-gray-600 hover:bg-gray-500 rounded"
+                            >
+                              {p}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
 
                     {idioma === 'coreano' && (
-                      <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
-                        {hangul.map((ch) => (
-                          <button
-                            key={`ko-${ch}`}
-                            type="button"
-                            onClick={() => setTextoVerificado((prev) => prev + ch)}
-                            className="px-2 py-1 text-sm bg-gray-700 hover:bg-gray-600 rounded"
-                          >
-                            {ch}
-                          </button>
-                        ))}
+                      <div className="space-y-1">
+                        <p className="text-xs text-gray-500">Sílabas comunes:</p>
+                        <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto">
+                          {hangulComun.map((ch: string) => (
+                            <button
+                              key={`ko-${ch}`}
+                              type="button"
+                              onClick={() => setTextoVerificado((prev) => prev + ch)}
+                              className="px-2 py-1 text-sm bg-gray-700 hover:bg-gray-600 rounded"
+                            >
+                              {ch}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-500 pt-1">Palabras frecuentes:</p>
+                        <div className="flex flex-wrap gap-1 max-h-16 overflow-y-auto border-t border-gray-700 pt-1">
+                          {hangulExtra.map((ch: string) => (
+                            <button
+                              key={`koe-${ch}`}
+                              type="button"
+                              onClick={() => setTextoVerificado((prev) => prev + ch)}
+                              className="px-2 py-1 text-sm bg-indigo-700 hover:bg-indigo-600 rounded"
+                            >
+                              {ch}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-xs text-gray-500 pt-1">Puntuación:</p>
+                        <div className="flex flex-wrap gap-1 max-h-12 overflow-y-auto border-t border-gray-700 pt-1">
+                          {puntuacion.map((ch: string, idx: number) => (
+                            <button
+                              key={`kop-${idx}`}
+                              type="button"
+                              onClick={() => setTextoVerificado((prev) => prev + ch)}
+                              className="px-2 py-1 text-sm bg-gray-600 hover:bg-gray-500 rounded"
+                            >
+                              {ch}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
