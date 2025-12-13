@@ -847,7 +847,7 @@ export default function Home() {
         </div>
 
         <div className="mt-8 text-center text-gray-500 text-xs">
-          <p>OCR by Tesseract.js (tessdata local) • Versión prueba</p>
+          <p>Traductor • Versión prueba</p>
         </div>
       </div>
     </div>
